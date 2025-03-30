@@ -80,6 +80,8 @@ import {
 } from '@cqlab/ui-flow-diagram';
 import compact from 'lodash/compact';
 import { cloneCopyPasteState } from './utils';
+import { Button, Panel } from '@mui/material';
+import { AutoGraphIcon } from '@mui/icons-material';
 
 interface NodesAndEdges {
   nodes: LocalFlowNode[];
@@ -858,6 +860,10 @@ export function FlowDiagram() {
     backgroundGap = 120;
   }
 
+  const onLayout = useCallback(() => {
+    // Implement layout logic here
+  }, []);
+
   return (
     <Box
       id="flow-diag-parent"
@@ -887,7 +893,6 @@ export function FlowDiagram() {
             nodeTypes={flowDiagramNodeTypes}
             onNodeDragStop={onNodeDragStop}
             onSelectionDragStop={handleSelectionDragStop}
-            // onSelectionEnd={handleSelectionEnd}
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             onInit={setReactFlowInstance}
@@ -897,42 +902,70 @@ export function FlowDiagram() {
             edgeUpdaterRadius={20}
             panOnScroll
             panOnDrag
-            // panOnDrag={false}
             maxZoom={2}
             minZoom={0.1}
-            // selectNodesOnDrag={false}
-            // onEdgeUpdaterMouseEnter={(e) => {
-
-            // }}
-            // onConnectStart={onConnectStart}
-            // onConnectEnd={onConnectEnd}
-            edgeTypes={flowDiagramEdgesTypes}
-            // snapToGrid
+            defaultEdgeOptions={{
+              type: 'smoothstep',
+              animated: true,
+              style: { 
+                stroke: '#b1b1b7',
+                strokeWidth: 2,
+                strokeDasharray: '5,5',
+              },
+              markerEnd: {
+                type: 'arrowclosed',
+                width: 20,
+                height: 20,
+                color: '#b1b1b7',
+              },
+            }}
+            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            nodesDraggable={true}
+            nodesConnectable={true}
+            elementsSelectable={true}
+            selectNodesOnDrag={true}
+            snapToGrid={true}
+            snapGrid={[15, 15]}
+            deleteKeyCode="Delete"
+            multiSelectionKeyCode="Shift"
+            selectionKeyCode="Shift"
             fitView
+            edgeTypes={flowDiagramEdgesTypes}
+            style={{
+              background: '#f8f9fa',
+              borderRadius: '8px',
+            }}
           >
-            {/* <Background
-              color="rgb(225,225,225)"
-              // color="#E3F2FD"
-              // color="#BBDEFB"
+            <Background
+              color="rgb(240,240,240)"
               gap={32}
               size={3}
-              variant={BackgroundVariant.Cross}
-            /> */}
+              variant={BackgroundVariant.Lines}
+            />
             <Controls />
-            <Background
-              id="1"
-              gap={backgroundGap}
-              // color="rgba(227,242,253, 0.5)"
-              color="rgb(245,245,245)"
-              variant={BackgroundVariant.Lines}
-            />
-            <Background
-              id="2"
-              gap={backgroundGap * 5}
-              color="rgb(240,240,240)"
-              // color="#E1F5FE"
-              variant={BackgroundVariant.Lines}
-            />
+            <Panel position="top-right">
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  onClick={onLayout}
+                  startIcon={<AutoGraphIcon />}
+                >
+                  Auto Layout
+                </Button>
+              </Box>
+            </Panel>
+            <Panel position="bottom-left">
+              <Box sx={{ 
+                background: 'white', 
+                padding: 1, 
+                borderRadius: 1, 
+                boxShadow: 1,
+                fontSize: '0.8rem',
+                color: '#666'
+              }}>
+                Tip: Click and drag from node handles to create connections. Press Delete to remove selected connections.
+              </Box>
+            </Panel>
           </ReactFlow>
         </FlowDiagramContext.Provider>
       </Box>

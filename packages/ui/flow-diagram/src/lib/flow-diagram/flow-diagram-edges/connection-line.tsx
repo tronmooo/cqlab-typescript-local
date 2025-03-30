@@ -63,6 +63,8 @@ export function CustomConnectionLine(props: ConnectionLineComponentProps) {
     sourceY: fromY,
     targetX: toX,
     targetY: toY,
+    sourcePosition: fromPosition,
+    targetPosition: toPosition,
   });
 
   if (path === null) {
@@ -72,9 +74,41 @@ export function CustomConnectionLine(props: ConnectionLineComponentProps) {
   return (
     <BaseEdge
       path={path}
-      // markerEnd={markerEnd}
-      style={{ strokeWidth: 3 }}
-      // interactionWidth={10}
+      style={{
+        strokeWidth: 2,
+        stroke: '#b1b1b7',
+        strokeDasharray: '5,5',
+        animation: 'dash 1s linear infinite',
+        ...connectionLineStyle,
+      }}
     />
   );
 }
+
+// Add this CSS animation for the edges
+const edgeAnimation = `
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+`;
+
+export const edgeStyles = {
+  default: {
+    strokeWidth: 2,
+    stroke: '#b1b1b7',
+    strokeDasharray: '5,5',
+    animation: 'dash 1s linear infinite',
+  },
+  selected: {
+    strokeWidth: 3,
+    stroke: '#1890ff',
+    strokeDasharray: 'none',
+  },
+  hover: {
+    strokeWidth: 3,
+    stroke: '#40a9ff',
+    strokeDasharray: 'none',
+  },
+};

@@ -1,0 +1,25 @@
+describe('Create New Flow Test', () => {
+  it('should click on the CQFlow link, create a new flow, and enter ID', () => {
+    // Visit the page where the link is located
+    cy.visit('http://localhost:4201')
+
+    // Click on the CQFlow link
+    cy.get('a[href="/flow"]').contains('CQFlow').click()
+
+    // Verify that the URL has changed to include '/flow'
+    cy.url().should('include', '/flow')
+
+    // Click on the Create New Flow button
+    cy.contains('button', 'Create New Flow').should('be.visible').click()
+
+    // Wait for the pop-up to appear
+    cy.get('.MuiDialog-root', { timeout: 10000 }).should('be.visible')
+
+    // Find the input field and type 'xx'
+    cy.get('.MuiDialog-root input').first().should('be.visible').type('xy')
+
+    // Find the create button and click it
+    cy.get('.MuiDialog-root').contains('button', 'Create').should('be.visible').click()
+
+
+  })

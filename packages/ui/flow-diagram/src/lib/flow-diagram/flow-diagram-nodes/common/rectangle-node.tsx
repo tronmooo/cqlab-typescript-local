@@ -1,4 +1,4 @@
-import { ReactNode, useContext } from 'react';
+import { ReactNode, useContext, memo } from 'react';
 import { NodeResizeControl, useStore, Handle, Position } from 'reactflow';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -16,6 +16,7 @@ import { MultiChoicePicker } from './multi-choice-picker';
 import { getNodeColor, getNodeColorLight } from '../../colors';
 import { FlowDiagramContext } from '../../flow-diagram-context';
 import { handleStyle } from './handle-style';
+import { FlowNodeData } from '../../convert-nodes-and-edges';
 
 interface FooterHandle {
   id: string;
@@ -57,304 +58,84 @@ enum PickerType {
   Multi = 'Multi',
 }
 
-type RectangleDiagramNodeProps = {
-  title: string;
-  color?: string;
-  // footerHandles?: FooterHandle[];
-  children: ReactNode;
-  flowNode: IFlowDefinitionNode;
-  validationStatus?: ValidationEnum;
-  editMode: boolean;
-  backgroundColor?: string;
-  border?: string;
-};
+interface RectangleDiagramNodeProps {
+  data: FlowNodeData<any>;
+  isConnectable?: boolean;
+  selected?: boolean;
+  style?: any;
+}
 
-const RectangleDiagramNode = ({
-  title,
-  color,
-  children,
-  // footerHandles,
-  flowNode,
-  validationStatus,
-  editMode,
-  backgroundColor,
-  border,
-}: RectangleDiagramNodeProps) => {
-  const connectionNodeId = useStore((state) => state.connectionNodeId);
-
-  const { selectedNodeId, creatingEdge } = useContext(FlowDiagramContext);
-
-  if (!flowNode) {
-    return <Box>ERROR: NODE NOT FOUND</Box>;
-  }
-
-  const isTarget = connectionNodeId && connectionNodeId !== flowNode.id;
-  const isConnectableStart = creatingEdge?.sourceId === flowNode.id;
-  const isConnectableEnd = !!(
-    creatingEdge && creatingEdge.sourceId !== flowNode.id
-  );
-  const isSelected = selectedNodeId === flowNode.id;
-
-  let pickerType = PickerType.Unary;
-  if (flowNode.nodeType === DefinitionNodeTypeEnum.Branch) {
-    pickerType = PickerType.Multi;
-  } else if (isBooleanNode(flowNode)) {
-    pickerType = PickerType.Binary;
-  }
-
-  const nodeColor = color || getNodeColor(flowNode.nodeType);
+function RectangleDiagramNode({
+  data,
+  isConnectable = true,
+  selected = false,
+  style,
+}: RectangleDiagramNodeProps) {
+  const { node, validationStatus } = data;
+  const color = getNodeColor(node.nodeType);
+  const isInvalid = validationStatus === 'INVALID';
 
   return (
     <Paper
-      elevation={0}
-      // square
+      elevation={selected ? 4 : 1}
       sx={{
-        height: '100%',
-        borderRadius: '10px',
         position: 'relative',
-        cursor: isTarget ? 'crosshair' : 'default',
-        padding: '3px 0px 2px 0px',
-        fontSize: '12px',
-        display: 'flex',
-        background: backgroundColor || 'white',
-        border: border || `1px solid ${getNodeColorLight(flowNode.nodeType)}`,
-        boxShadow: isSelected ? `0 1px 8px -2px ${nodeColor}` : 'inehrit',
-        // boxShadow: `0 0 15px 2px ${nodeColor}`,
-        flexDirection: 'column',
-        '.resize-icon': {
-          display: 'none',
+        padding: 2,
+        minWidth: 200,
+        minHeight: 60,
+        border: `2px solid ${selected ? color : isInvalid ? '#ff4d4f' : '#e0e0e0'}`,
+        borderRadius: 2,
+        backgroundColor: 'white',
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': {
+          boxShadow: 3,
+          borderColor: color,
+          transform: 'translateY(-1px)',
         },
-        ':hover': {
-          '.resize-icon': {
-            display: 'inherit',
-          },
-        },
+        ...style,
       }}
     >
-      {/* {flowNode.disabled && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(80,80,80,0.1)',
-            }}
-          />
-        )} */}
-
       <Box
         sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          borderRadius: '10px',
-          border: '2px dashed #5E4A06',
-          background: 'rgba(255,250,234, 0.2)',
-          // opacity: 0.2,
-          // display: isTarget ? 'inherit' : 'none',
-          display: 'none',
-          cursor: 'cell',
-        }}
-      />
-
-      {validationStatus === ValidationEnum.VALID && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderRadius: '10px',
-            background: 'rgba(129,199,132, 0.1)',
-            border: '1px solid rgb(129,199,132)',
-          }}
-        />
-      )}
-
-      {validationStatus === ValidationEnum.INVALID && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderRadius: '10px',
-            background: 'rgba(229,115,115, 0.1)',
-            border: '1px solid rgb(229,115,115)',
-          }}
-        />
-      )}
-
-      <Box
-        sx={{
-          // fontWeight: 'bold',
-          paddingTop: '2px',
-          paddingBottom: '3px',
-          // color: color,
-          position: 'relative',
-          textAlign: 'center',
-          fontFamily: 'Red Hat Display var(--cq-title-font)',
-          fontWeight: 600,
-          // color: 'sec',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          color: color,
+          fontWeight: 500,
+          fontSize: '0.9rem',
         }}
       >
-        <Box sx={{ color: nodeColor }}>{title}</Box>
+        {node.label}
       </Box>
 
-      <Box
-        sx={{
-          padding: '5px 5px',
-          // borderTop: '1px solid rgb(210,210,210)',
-          flexGrow: 1,
-          overflowY: 'hidden',
-        }}
-      >
-        {children}
-      </Box>
-
-      {/* {footerHandles && (
-        <Box
-          sx={{
-            display: 'flex',
-            // borderTop: '1px solid rgb(210,210,210)',
-            // marginTop: '10px',
-            justifyContent: 'space-evenly',
-            height: '1px',
-            '.react-flow__handle': {
-              height: '7px',
-              width: '7px',
-              borderRadius: 0,
-              border: 0,
-              bottom: '-6px',
-              background: 'rgb(80, 80, 80)',
-            },
-          }}
-        >
-          { {footerHandles.map((footerHandle, index) => (
-            <Box key={index} sx={{ padding: '0 5px', position: 'relative' }}>
-
-
-              <Handle
-                id={footerHandle.id || index + '_'}
-                type="source"
-                position={Position.Bottom}
-                isConnectable={isConnectable}
-              />
-            </Box>
-          ))} }
-        </Box>
-      )} */}
-
-      <Handle
-        id="top"
-        type="source"
-        position={Position.Top}
-        // isConnectable={!!isTarget}
-        isConnectableStart={isConnectableStart}
-        isConnectableEnd={isConnectableEnd}
-        style={{
-          ...handleStyle,
-          top: '-6px',
-          opacity: isConnectableStart || isTarget ? 1 : 0,
-        }}
-      />
-
-      <Handle
-        id="bottom"
-        type="source"
-        position={Position.Bottom}
-        // isConnectable={!!isTarget}
-        style={{
-          ...handleStyle,
-          bottom: '-6px',
-          opacity: isConnectableStart || isTarget ? 1 : 0,
-          // opacity: isTarget ? 1 : 0,
-        }}
-      />
-
-      <Handle
-        id="right"
-        type="source"
-        position={Position.Right}
-        // isConnectable={!!isTarget}
-        style={{
-          ...handleStyle,
-          right: '-6px',
-          opacity: isConnectableStart || isTarget ? 1 : 0,
-          // opacity: isTarget ? 1 : 0,
-        }}
-      />
-
-      <Handle
-        id="left"
-        type="source"
-        position={Position.Left}
-        isConnectable={!!isTarget}
-        style={{
-          ...handleStyle,
-          left: '-6px',
-          opacity: isConnectableStart || isTarget ? 1 : 0,
-          // opacity: isTarget ? 1 : 0,
-        }}
-      />
-
-      {editMode && (
-        <NodeResizeControl style={controlStyle} minWidth={150} minHeight={60}>
-          <ResizeIcon />
-        </NodeResizeControl>
-      )}
-      {pickerType === PickerType.Unary && (
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '-20px',
-            right: '-100px',
-          }}
-        >
-          <NextPicker
-            isSelected={editMode && !isConnectableStart ? isSelected : false}
-            sourceId={flowNode.id}
-          />
-        </Box>
-      )}
-      {pickerType === PickerType.Binary && (
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: '-40px',
-            right: '-100px',
-          }}
-        >
-          <TrueFalsePicker
-            isSelected={editMode && !isConnectableStart ? isSelected : false}
-            sourceId={flowNode.id}
-          />
-        </Box>
-      )}
-      {pickerType === PickerType.Multi &&
-        flowNode.nodeType === DefinitionNodeTypeEnum.Branch && (
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: '-40px',
-              right: '-70px',
+      {isConnectable && (
+        <>
+          <Handle
+            type="target"
+            position={Position.Top}
+            style={{
+              width: 8,
+              height: 8,
+              background: color,
+              border: '2px solid white',
+              boxShadow: '0 0 0 2px #e0e0e0',
             }}
-          >
-            <MultiChoicePicker
-              isSelected={editMode && !isConnectableStart ? isSelected : false}
-              next={flowNode.next}
-              sourceId={flowNode.id}
-            />
-          </Box>
-        )}
+          />
+          <Handle
+            type="source"
+            position={Position.Bottom}
+            style={{
+              width: 8,
+              height: 8,
+              background: color,
+              border: '2px solid white',
+              boxShadow: '0 0 0 2px #e0e0e0',
+            }}
+          />
+        </>
+      )}
     </Paper>
   );
-};
+}
 
-export default RectangleDiagramNode;
+export default memo(RectangleDiagramNode);

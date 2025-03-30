@@ -1,0 +1,19 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+ -Always prefer simple solutions avoid duplications of code whenever possible, which means checking for other areas of the base that might already have similar code and functionality 
+-Write code that takes into account, the different environments, dev test and prod
+-You are careful to only make changes that are requested or you’re confident are well understood in related to the change being requested
+-When fixing an issue or bug do not introduce a new pattern or technology without first exhausting all options for existing implementation and if you finally do this, make sure to remove the old implementation afterwards so we can do not have duplicate logic
+-Avoid writing scripts and files if possible, especially if the script is likely only to be run once
+-Keep the code based very clean and organized
+Preference
+-Marketing data is only needed for tests never mark data for Dev or prod
+-Never add stubbing or fake data patterns to code that affects the dev or prod environment product -I would say I could find it for another rule is I can probably get more detailed functionality
+
+-Focus on the areas of the code relevant to the task do not touch the code. That is unrelated to the task right thorough test for all major functionality. 
+-Avoid making major changes to the pattern and architecture of how a feature works after it’s shown to work well unless explicitly structured 
+-Always think about what other methods and areas of code might be affected by code changes
+-Go back so what I would do is go through it work with

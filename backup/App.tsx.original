@@ -1,0 +1,59 @@
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
+import MainLayout from './components/layout/MainLayout';
+import Dashboard from './pages/Dashboard';
+import Flows from './pages/Flows';
+import FlowDetail from './pages/FlowDetail';
+import Library from './pages/Library';
+import Vocabulary from './pages/Vocabulary';
+import MockData from './pages/MockData';
+import Settings from './pages/Settings';
+import Code from './pages/Code';
+import Help from './pages/Help';
+import Profile from './pages/Profile';
+import Account from './pages/Account';
+import Logout from './pages/Logout';
+import TestWorkbench from './pages/TestWorkbench';
+
+// Wrapper component that uses MainLayout
+const MainLayoutWrapper: React.FC = () => {
+  return (
+    <MainLayout>
+      <Outlet />
+    </MainLayout>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<MainLayoutWrapper />}>
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        
+        <Route path="flows">
+          <Route index element={<Flows />} />
+          <Route path=":id" element={<FlowDetail />} />
+        </Route>
+        
+        <Route path="library" element={<Library />} />
+        <Route path="vocabulary" element={<Vocabulary />} />
+        <Route path="mock-data" element={<MockData />} />
+        <Route path="test-workbench" element={<TestWorkbench />} />
+        
+        <Route path="settings" element={<Settings />} />
+        <Route path="help" element={<Help />} />
+        <Route path="code" element={<Code />} />
+        
+        <Route path="profile" element={<Profile />} />
+        <Route path="account" element={<Account />} />
+        <Route path="logout" element={<Logout />} />
+        
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Route>
+    </Routes>
+  );
+};
+
+export default App; 
